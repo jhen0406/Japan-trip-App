@@ -1,6 +1,6 @@
 import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { APP_BASE_HREF } from '@angular/common';
+import { DOCUMENT } from '@angular/common';
 
 interface InfoSection {
   title: string;
@@ -17,9 +17,16 @@ interface InfoSection {
   styleUrl: './information.scss'
 })
 export class Information {
-  private baseHref = inject(APP_BASE_HREF, { optional: true }) ?? '/';
-  // 確保結尾有 /
-  private base = this.baseHref.endsWith('/') ? this.baseHref : this.baseHref + '/';
+  private doc = inject(DOCUMENT);
+
+  // 圖片 URL 用 [src] binding 直接渲染，繞過 innerHTML sanitizer
+  get mapImageUrls(): string[] {
+    const base = this.doc.baseURI;
+    return [
+      `${base}博多車站地圖1.png`,
+      `${base}博多車站地圖2.png`,
+    ];
+  }
 
   sections = signal<InfoSection[]>([
     {
@@ -54,25 +61,12 @@ export class Information {
       title: '博多車站地圖指引',
       icon: 'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7',
       isOpen: false,
-      get contentHtml() { return ''; } // placeholder, 實際在 getter 中提供
+      contentHtml: '' // 地圖由 template 直接用 [src] binding 渲染，見 information.html
     }
   ]);
 
-  // 動態產生博多地圖 HTML（含正確 base-href 路徑）
-  get hakataMapHtml(): string {
-    return `
-      <p class="text-sm text-slate-600 mb-3">博多車站為九州最大轉乘車站，佔地廣大。以下分為 1 樓與地下街地圖：</p>
-      <div class="flex flex-col gap-3">
-        <img src="${this.base}博多車站地圖1.png" alt="博多車站地圖 1" class="w-full rounded-xl border border-slate-200 shadow-sm" />
-        <img src="${this.base}博多車站地圖2.png" alt="博多車站地圖 2" class="w-full rounded-xl border border-slate-200 shadow-sm" />
-      </div>
-    `;
-  }
-
-
   toggleSection(index: number) {
     this.sections.update(list => {
-      // If we want only one to be open at a time (accordion style)
       return list.map((sec, i) => {
         if (i === index) return { ...sec, isOpen: !sec.isOpen };
         return { ...sec, isOpen: false };

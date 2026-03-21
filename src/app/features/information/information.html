@@ -38,10 +38,20 @@
                [class.grid-rows-[0fr]]="!section.isOpen" 
                class="grid transition-[grid-template-rows] duration-300 ease-in-out">
             <div class="overflow-hidden">
-              <div class="p-5 pt-1 border-t border-slate-50/50"
-                   [innerHTML]="idx === sections().length - 1 ? hakataMapHtml : section.contentHtml">
-                <!-- Content injected via innerHTML from TS -->
-              </div>
+              @if (idx === sections().length - 1) {
+                <!-- 博多車站地圖：用 [src] binding 繞過 innerHTML sanitizer -->
+                <div class="p-5 pt-1 border-t border-slate-50/50">
+                  <p class="text-sm text-slate-600 mb-3">博多車站為九州最大轉乘車站，佔地廣大。以下分為 1 樓與地下街地圖：</p>
+                  <div class="flex flex-col gap-3">
+                    @for (url of mapImageUrls; track url) {
+                      <img [src]="url" alt="博多車站地圖" class="w-full rounded-xl border border-slate-200 shadow-sm" />
+                    }
+                  </div>
+                </div>
+              } @else {
+                <div class="p-5 pt-1 border-t border-slate-50/50" [innerHTML]="section.contentHtml">
+                </div>
+              }
             </div>
           </div>
 
