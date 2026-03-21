@@ -1,0 +1,129 @@
+<header class="sticky top-0 w-full z-50 bg-[#fff8f6]/70 dark:bg-stone-900/70 backdrop-blur-md flex justify-between items-center px-6 h-16 shadow-sm">
+  <div class="flex items-center gap-4">
+    <button class="text-primary dark:text-[#feabaa] active:scale-95 duration-200">
+      <span class="material-symbols-outlined" data-icon="menu">menu</span>
+    </button>
+    <h1 class="font-['Lexend'] text-xl font-bold text-primary dark:text-[#feabaa] tracking-tighter">The Ethereal Traveler</h1>
+  </div>
+</header>
+
+<main class="pt-6 px-4 md:px-6 max-w-2xl mx-auto pb-14">
+  <!-- Section Header -->
+  <div class="mb-8">
+    <h2 class="text-3xl font-bold font-['Lexend'] text-on-surface tracking-tight">Weather Forecast</h2>
+    <p class="text-on-surface-variant mt-2">Curated atmosphere for your journey.</p>
+  </div>
+  
+  <!-- Segmented Control -->
+  <div class="bg-surface-container-low p-1.5 rounded-full flex mb-10 shadow-sm border border-surface-container-highest">
+    <button (click)="currentTab.set('instant')" 
+            [class]="currentTab() === 'instant' ? 'bg-primary text-on-primary shadow-md' : 'text-on-surface-variant hover:text-primary'" 
+            class="flex-1 py-3 px-4 rounded-full text-sm font-semibold transition-all">
+      即時天氣
+    </button>
+    <button (click)="currentTab.set('forecast')" 
+            [class]="currentTab() === 'forecast' ? 'bg-primary text-on-primary shadow-md' : 'text-on-surface-variant hover:text-primary'" 
+            class="flex-1 py-3 px-4 rounded-full text-sm font-semibold transition-all">
+      五天預報
+    </button>
+  </div>
+
+  @if (isLoading()) {
+    <div class="text-center py-20">
+      <div class="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin mx-auto mb-4"></div>
+      <p class="text-on-surface-variant font-medium text-sm">正在從 OpenWeather 取得最新氣象資料...</p>
+    </div>
+  } @else {
+    
+    <!-- Instant Weather View -->
+    @if (currentTab() === 'instant') {
+      <div class="space-y-8 animate-fade-in">
+        @for (weather of weatherList(); track weather.city; let i = $index) {
+          <!-- Alternate gradient for different cities -->
+          <div [class]="i % 2 === 0 ? 'from-[#FFC988] to-[#F5CEC7]' : 'from-[#feabaa] to-[#ffdbc8]'"
+               class="bg-gradient-to-br p-6 sm:p-8 rounded-xl shadow-lg relative overflow-hidden group">
+               
+            <!-- Background Decoration -->
+            <div class="absolute -right-4 -top-4 opacity-10 group-hover:scale-110 transition-transform duration-700 pointer-events-none">
+              <span class="material-symbols-outlined text-[180px]">
+                {{ weather.temp > 20 ? 'wb_sunny' : 'cloud' }}
+              </span>
+            </div>
+            
+            <div class="relative z-10 w-full">
+              <!-- Top Header: City & Desc & Icon -->
+              <div class="flex justify-between items-start mb-6">
+                <div>
+                  <h3 class="text-2xl font-bold text-on-background tracking-tighter">{{ weather.city }}</h3>
+                  <p class="text-on-surface-variant font-medium opacity-80 capitalize">{{ weather.description }}</p>
+                </div>
+                <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm -mt-2 -mr-2 shadow-inner">
+                  <img [src]="weather.icon" alt="weather icon" class="w-14 h-14 object-contain brightness-110 drop-shadow-md" />
+                </div>
+              </div>
+              
+              <!-- Large Temperature -->
+              <div class="flex items-end gap-2 mb-8">
+                <span class="text-6xl sm:text-7xl font-extrabold tracking-tighter text-on-background">{{ weather.temp }}°</span>
+                <div class="pb-2">
+                  <p class="text-xs font-bold uppercase tracking-widest text-on-background/50">Celsius</p>
+                </div>
+              </div>
+              
+              <!-- Stats Grid -->
+              <div class="grid grid-cols-2 gap-3 sm:gap-4 mb-8">
+                <div class="bg-white/30 backdrop-blur-md rounded-2xl p-4 flex items-center gap-3 shadow-sm border border-white/20">
+                  <span class="material-symbols-outlined text-on-background/70">thermometer</span>
+                  <div>
+                    <p class="text-[10px] uppercase font-bold text-on-background/50 leading-none">體感溫度</p>
+                    <p class="text-lg font-bold text-on-background">{{ weather.feelsLike }}°C</p>
+                  </div>
+                </div>
+                <div class="bg-white/30 backdrop-blur-md rounded-2xl p-4 flex items-center gap-3 shadow-sm border border-white/20">
+                  <span class="material-symbols-outlined text-on-background/70">humidity_low</span>
+                  <div>
+                    <p class="text-[10px] uppercase font-bold text-on-background/50 leading-none">濕度</p>
+                    <p class="text-lg font-bold text-on-background">{{ weather.humidity }}%</p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Clothing Suggestion Section -->
+              <div class="bg-surface/60 backdrop-blur-xl rounded-2xl p-5 border border-white/20 shadow-inner">
+                <div class="flex items-center gap-3 mb-2">
+                  <span class="material-symbols-outlined text-primary">checkroom</span>
+                  <h4 class="font-bold text-sm text-on-background">穿衣建議</h4>
+                </div>
+                <p class="text-sm text-on-background/80 leading-relaxed font-medium">
+                  {{ weather.advice }}
+                </p>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <!-- 5-Day Forecast View -->
+      <div class="space-y-10 animate-fade-in">
+        @for (forecast of forecastList(); track forecast.city) {
+          <section>
+            <h3 class="font-['Lexend'] font-bold text-lg mb-4 text-on-surface border-l-4 border-primary pl-3">{{ forecast.city }} - 五天預報</h3>
+            
+            <div class="flex justify-between items-center bg-surface-container rounded-2xl p-4 sm:p-6 overflow-x-auto gap-3 flex-nowrap shadow-inner border border-surface-container-highest">
+              @for (day of forecast.days; track day.date) {
+                <div class="text-center min-w-[50px] flex-1">
+                  <p class="text-[11px] font-bold text-on-surface-variant uppercase mb-2">{{ day.date }}</p>
+                  <div class="w-10 h-10 mx-auto bg-white/50 rounded-full flex items-center justify-center mb-2 shadow-sm">
+                    <img [src]="day.icon" class="w-8 h-8 object-contain" />
+                  </div>
+                  <p class="font-bold text-on-surface text-sm whitespace-nowrap">{{ day.tempMin }}°~{{ day.tempMax }}°</p>
+                </div>
+              }
+            </div>
+          </section>
+        }
+      </div>
+    }
+    
+  }
+</main>

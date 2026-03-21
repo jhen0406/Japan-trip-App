@@ -1,0 +1,355 @@
+<div class="min-h-full flex flex-col pt-4 px-4 sm:px-6">
+  
+  <!-- Header Title & View Switcher -->
+  <div class="mb-5 flex justify-between items-end">
+    <div>
+      <h1 class="font-['Lexend'] text-xl font-bold text-primary tracking-tighter">記帳本</h1>
+    </div>
+    
+    <!-- View Switcher -->
+    <div class="flex bg-surface-container-high/60 p-1 rounded-full shadow-inner">
+      <button (click)="currentView.set('form')" 
+              [class.bg-white]="currentView() === 'form'"
+              [class.shadow-sm]="currentView() === 'form'"
+              [class.text-primary]="currentView() === 'form'"
+              [class.font-bold]="currentView() === 'form'"
+              [class.text-on-surface-variant]="currentView() !== 'form'"
+              class="px-4 py-1.5 rounded-full text-sm font-medium transition-all">新增</button>
+      <button (click)="currentView.set('history')" 
+              [class.bg-white]="currentView() === 'history'"
+              [class.shadow-sm]="currentView() === 'history'"
+              [class.text-primary]="currentView() === 'history'"
+              [class.font-bold]="currentView() === 'history'"
+              [class.text-on-surface-variant]="currentView() !== 'history'"
+              class="px-4 py-1.5 rounded-full text-sm font-medium transition-all">紀錄</button>
+      <button (click)="currentView.set('stats')" 
+              [class.bg-white]="currentView() === 'stats'"
+              [class.shadow-sm]="currentView() === 'stats'"
+              [class.text-primary]="currentView() === 'stats'"
+              [class.font-bold]="currentView() === 'stats'"
+              [class.text-on-surface-variant]="currentView() !== 'stats'"
+              class="px-4 py-1.5 rounded-full text-sm font-medium transition-all">統計</button>
+    </div>
+  </div>
+
+  @if (currentView() === 'form') {
+    <!-- Form View -->
+    <div class="flex-1 bg-white rounded-[32px] p-5 shadow-sm mb-6 border border-surface-container-highest/60">
+      <form #f="ngForm" (ngSubmit)="submitForm()">
+        
+        <!-- 金額 & 幣別 -->
+        <div class="flex gap-3 mb-4">
+          <div class="flex-1 relative">
+            <label class="block text-xs font-medium text-on-surface-variant mb-1.5 ml-1">金額</label>
+            <input type="number" 
+                   [(ngModel)]="formData.amount" name="amount"
+                   class="w-full bg-surface-bright border-none rounded-2xl px-4 py-3.5 text-lg font-bold text-on-surface placeholder:text-on-surface/30 focus:ring-2 focus:ring-primary/40 transition-shadow outline-none" 
+                   placeholder="0" required>
+          </div>
+          <div class="w-28 relative">
+            <label class="block text-xs font-medium text-on-surface-variant mb-1.5 ml-1">幣別</label>
+            <select [(ngModel)]="formData.currency" name="currency"
+                    class="w-full bg-surface-bright border-none rounded-2xl px-4 py-3.5 text-base font-bold text-on-surface focus:ring-2 focus:ring-primary/40 transition-shadow outline-none appearance-none">
+              <option value="JPY">JPY ¥</option>
+              <option value="TWD">TWD $</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 類別 & 購買項目 -->
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div>
+            <label class="block text-xs font-medium text-on-surface-variant mb-1.5 ml-1">類別</label>
+            <select [(ngModel)]="formData.category" name="category"
+                    class="w-full bg-surface-bright border-none rounded-2xl px-4 py-3 text-sm font-medium text-on-surface focus:ring-2 focus:ring-primary/40 outline-none">
+              @for (cat of categories; track cat) {
+                <option [value]="cat">{{ cat }}</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-on-surface-variant mb-1.5 ml-1">購買項目</label>
+            <input type="text" [(ngModel)]="formData.item" name="item" placeholder="例：章魚燒"
+                   class="w-full bg-surface-bright border-none rounded-2xl px-4 py-3 text-sm font-medium text-on-surface focus:ring-2 focus:ring-primary/40 outline-none">
+          </div>
+        </div>
+
+        <!-- 付款人 & 方式 -->
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div>
+            <label class="block text-xs font-medium text-on-surface-variant mb-1.5 ml-1">誰付款</label>
+            <select [(ngModel)]="formData.payer" name="payer"
+                    class="w-full bg-surface-bright border-none rounded-2xl px-4 py-3 text-sm font-medium text-on-surface focus:ring-2 focus:ring-primary/40 outline-none">
+              @for (p of payers; track p) {
+                <option [value]="p">{{ p }}</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-on-surface-variant mb-1.5 ml-1">付款方式</label>
+            <select [(ngModel)]="formData.payMethod" name="payMethod"
+                    class="w-full bg-surface-bright border-none rounded-2xl px-4 py-3 text-sm font-medium text-on-surface focus:ring-2 focus:ring-primary/40 outline-none">
+              @for (method of payMethods; track method) {
+                <option [value]="method">{{ method }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <!-- 動態：信用卡/電支手key -->
+        @if (formData.payMethod === '信用卡' || formData.payMethod === '電子支付') {
+          <div class="mb-4 animate-fade-in">
+            <input type="text" [(ngModel)]="formData.payMethodDetail" name="payMethodDetail" placeholder="請輸入卡名或支付名稱 (例: 富邦J卡)"
+                   class="w-full bg-surface-bright border-none rounded-2xl px-4 py-3 text-sm font-medium text-on-surface focus:ring-2 focus:ring-primary/40 outline-none">
+          </div>
+        }
+
+        <!-- 地點 & 退稅 -->
+        <div class="flex gap-3 mb-5 items-end">
+          <div class="flex-1">
+            <label class="block text-xs font-medium text-on-surface-variant mb-1.5 ml-1">購買地點</label>
+            <input type="text" [(ngModel)]="formData.location" name="location" placeholder="例：唐吉訶德"
+                   class="w-full bg-surface-bright border-none rounded-2xl px-4 py-3 text-sm font-medium text-on-surface focus:ring-2 focus:ring-primary/40 outline-none">
+          </div>
+          <div class="flex items-center gap-2 bg-surface-bright px-4 py-3 rounded-2xl h-[44px]">
+            <input type="checkbox" [(ngModel)]="formData.taxFree" name="taxFree" id="taxFree"
+                   class="w-4 h-4 text-primary bg-white border-none rounded focus:ring-primary/50">
+            <label for="taxFree" class="text-sm font-medium text-on-surface select-none">免稅</label>
+          </div>
+        </div>
+
+        <!-- 拍照上傳 -->
+        <div class="mb-6">
+          <label class="block text-xs font-medium text-on-surface-variant mb-1.5 ml-1">收據或明細拍照</label>
+          
+          @if (!formData.imageBase64) {
+            <label class="flex flex-col items-center justify-center w-full h-24 bg-surface-bright border-2 border-dashed border-primary-container rounded-2xl cursor-pointer hover:bg-primary-container/20 transition-colors">
+              <div class="flex flex-col items-center justify-center pt-2 pb-2">
+                <p class="text-[11px] text-on-surface-variant font-medium">點擊拍照或選擇相片</p>
+              </div>
+              <input #fileInput type="file" accept="image/*" capture="environment" class="hidden" (change)="onFileSelected($event)" />
+            </label>
+          } @else {
+            <div class="relative w-full overflow-hidden rounded-2xl border border-primary-container bg-black flex justify-center">
+              <img [src]="formData.imageBase64" class="h-32 object-contain" />
+              <button type="button" (click)="clearImage()" class="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1.5 hover:bg-black/70 backdrop-blur-md">
+                ✕
+              </button>
+            </div>
+          }
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" [disabled]="!f.form.valid || isSubmitting()"
+                class="w-full bg-primary hover:bg-primary/90 text-on-primary font-bold py-4 px-4 rounded-2xl shadow-lg shadow-primary/30 transition-all disabled:opacity-50 disabled:shadow-none relative overflow-hidden text-lg">
+          @if (isSubmitting()) {
+            <span class="flex items-center justify-center gap-2">
+              儲存中...
+            </span>
+          } @else {
+            <span>{{ submitSuccess() ? '儲存成功！' : '新增紀錄' }}</span>
+          }
+        </button>
+
+      </form>
+    </div>
+  } @else if (currentView() === 'history') {
+    
+    <!-- History View -->
+    <div class="flex-1 overflow-y-auto pb-4 hide-scrollbar">
+      <h3 class="text-sm font-bold text-on-surface mb-3 px-1">消費明細</h3>
+      
+      @if (isLoadingHistory()) {
+        <div class="text-center text-on-surface/50 py-10">載入中...</div>
+      } @else {
+        <div class="space-y-3">
+          @for (item of history(); track item.id) {
+            <div class="bg-surface-container-lowest p-4 rounded-[24px] shadow-sm flex items-center gap-4 border border-surface-container-highest">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container">{{ item.category }}</span>
+                  <p class="text-[11px] text-on-surface-variant truncate">{{ item.timestamp | date:'MM/dd HH:mm' }}</p>
+                </div>
+                <h4 class="text-[15px] font-semibold text-on-surface truncate">{{ item.item || item.location || '未命名項目' }}</h4>
+                <p class="text-[11px] text-on-surface-variant mt-0.5 truncate">{{ item.payer }} • {{ item.payMethod }}</p>
+              </div>
+              
+              <div class="text-right shrink-0">
+                <p class="text-base font-extrabold text-primary tracking-tight">{{ item.amount | number }}</p>
+                <p class="text-[10px] font-bold text-on-surface-variant">{{ item.currency }}</p>
+              </div>
+            </div>
+          }
+          
+          @if (history().length === 0) {
+            <div class="text-center text-on-surface-variant py-10 text-sm">尚無任何消費紀錄</div>
+          }
+        </div>
+      }
+    </div>
+  } @else if (currentView() === 'stats') {
+    
+    <!-- Stats View (Matching User Provided UI) -->
+    <div class="flex-1 overflow-y-auto pb-4 hide-scrollbar space-y-8">
+      
+      <!-- Hero Section: Historical Accumulated Spending -->
+      <section class="relative overflow-hidden bg-gradient-to-br from-primary to-primary-dim rounded-xl p-8 text-on-primary shadow-lg">
+        <div class="relative z-10">
+          <p class="text-on-primary/80 font-medium tracking-wide mb-2">歷史累積支出</p>
+          <div class="flex items-baseline gap-2">
+            <span class="text-4xl font-extrabold tracking-tight">¥{{ totalAmountJpy() | number }}</span>
+            <span class="text-xl font-light opacity-90">/ NT$ {{ totalAmountTwd() | number }}</span>
+          </div>
+        </div>
+        <!-- Decorative Element -->
+        <div class="absolute -right-12 -bottom-12 w-48 h-48 bg-primary-container/20 rounded-full blur-3xl"></div>
+      </section>
+
+      <!-- Filter Bar -->
+      <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide no-scrollbar -mx-2 px-2">
+        <button (click)="statsMode.set('category')" 
+                [class]="statsMode() === 'category' ? 'bg-secondary-container text-on-secondary-container shadow-sm' : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container'"
+                class="flex items-center gap-2 px-5 py-2.5 rounded-full whitespace-nowrap font-medium text-sm transition-all active:scale-95">
+          <span class="material-symbols-outlined text-[18px]">category</span>
+          類別
+        </button>
+        <button (click)="statsMode.set('time')" 
+                [class]="statsMode() === 'time' ? 'bg-secondary-container text-on-secondary-container shadow-sm' : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container'"
+                class="flex items-center gap-2 px-5 py-2.5 rounded-full whitespace-nowrap font-medium text-sm transition-all active:scale-95">
+          <span class="material-symbols-outlined text-[18px]">calendar_today</span>
+          每日
+        </button>
+        <button (click)="statsMode.set('payer')" 
+                [class]="statsMode() === 'payer' ? 'bg-secondary-container text-on-secondary-container shadow-sm' : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container'"
+                class="flex items-center gap-2 px-5 py-2.5 rounded-full whitespace-nowrap font-medium text-sm transition-all active:scale-95">
+          <span class="material-symbols-outlined text-[18px]">group</span>
+          誰付款
+        </button>
+        <button (click)="statsMode.set('payMethod')" 
+                [class]="statsMode() === 'payMethod' ? 'bg-secondary-container text-on-secondary-container shadow-sm' : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container'"
+                class="flex items-center gap-2 px-5 py-2.5 rounded-full whitespace-nowrap font-medium text-sm transition-all active:scale-95">
+          <span class="material-symbols-outlined text-[18px]">payments</span>
+          付款方式
+        </button>
+      </div>
+
+      <!-- Donut Chart Visualization -->
+      <section class="bg-surface-container-low rounded-xl p-8 flex flex-col items-center">
+        <h2 class="w-full text-left font-semibold text-lg mb-8 text-on-surface">
+          {{ statsMode() === 'time' ? '每日支出走勢' : '支出比例分析' }}
+        </h2>
+        
+        @if (isLoadingHistory()) {
+          <div class="text-on-surface-variant py-10">載入中...</div>
+        } @else if (statsDetails().length > 0) {
+          
+          @if (statsMode() !== 'time') {
+            <!-- Donut SVG -->
+            <div class="relative w-64 h-64">
+              <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                <!-- Background Circle -->
+                <circle cx="18" cy="18" fill="transparent" r="15.915" stroke="#fff0ee" stroke-width="3.5"></circle>
+                <!-- Dynamic Segments -->
+                @for (slice of svgSlices(); track slice.label) {
+                  @if (slice.percent > 0) {
+                    <circle class="transition-all duration-500 ease-in-out" 
+                            cx="18" cy="18" fill="transparent" r="15.915" 
+                            [attr.stroke]="slice.color" 
+                            [attr.stroke-dasharray]="slice.dashArray" 
+                            [attr.stroke-dashoffset]="slice.dashOffset" 
+                            stroke-width="4.5">
+                    </circle>
+                  }
+                }
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <span class="text-xs uppercase tracking-widest text-on-surface-variant font-semibold">Total</span>
+                <span class="text-3xl font-bold text-on-surface">¥{{ totalAmountJpy() | number }}</span>
+              </div>
+            </div>
+            
+            <!-- Legend -->
+            <div class="flex flex-wrap items-center justify-center w-full mt-10 gap-x-6 gap-y-4">
+              @for (slice of svgSlices(); track slice.label) {
+                <div class="flex flex-col items-center">
+                  <div class="w-3 h-3 rounded-full mb-2" [style.background-color]="slice.color"></div>
+                  <span class="text-xs text-on-surface-variant">{{ slice.label }}</span>
+                  <span class="font-bold text-sm">{{ slice.percent }}%</span>
+                </div>
+              }
+            </div>
+          } @else {
+            <!-- Bar Chart alternative for 'time' mode -->
+            <div class="w-full h-64 flex items-end gap-2 border-b border-surface-container-highest px-2 pt-4">
+              @for (slice of svgSlices(); track slice.label) {
+                <div class="flex-1 flex flex-col items-center justify-end h-full group relative">
+                  <!-- Bar -->
+                  <div class="w-full rounded-t-md transition-all duration-300 relative"
+                       [style.height.%]="(slice.amount / svgSlices()[0].amount) * 100"
+                       [style.background-color]="slice.color">
+                       <!-- Amount Tooltip on hover -->
+                       <div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-surface text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                         ¥{{ slice.amount | number }}
+                       </div>
+                  </div>
+                  <span class="text-[10px] text-on-surface-variant mt-2 rotate-45 md:rotate-0 origin-left">{{ slice.label }}</span>
+                </div>
+              }
+            </div>
+          }
+          
+        } @else {
+          <div class="text-on-surface-variant py-10">尚無資料分析</div>
+        }
+      </section>
+
+      <!-- Detailed Breakdown List -->
+      <section class="space-y-4">
+        <div class="flex justify-between items-center mb-2">
+          <h2 class="font-semibold text-lg text-on-surface">詳細分類</h2>
+        </div>
+        
+        @for (detail of statsDetails(); track detail.label) {
+          @if (detail.amount > 0) {
+            <!-- List Item -->
+            <div class="bg-surface-container-lowest p-5 rounded-lg flex flex-col shadow-sm border border-surface-container-highest">
+              
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                  <div class="w-12 h-12 rounded-full flex items-center justify-center bg-opacity-10" [style.background-color]="detail.color + '20'" [style.color]="detail.color">
+                    <span class="material-symbols-outlined font-bold border-2 rounded-full border-current w-4 h-4" [style.border-color]="detail.color"></span>
+                  </div>
+                  <div class="flex-1 min-w-0 pr-2">
+                    <h3 class="font-semibold text-on-surface truncate">{{ detail.label }}</h3>
+                    <p class="text-xs text-on-surface-variant mt-0.5">{{ detail.items.length }} 筆交易</p>
+                  </div>
+                </div>
+                <!-- Top-Right Total -->
+                <div class="text-right shrink-0">
+                  <p class="font-bold text-on-surface text-[15px]">¥{{ detail.amount | number }}</p>
+                  <p class="text-[10px] text-on-surface-variant uppercase tracking-tighter mt-0.5">{{ detail.percent | number:'1.1-1' }}%</p>
+                </div>
+              </div>
+              
+              <!-- Sub-items Mapping inside the card -->
+              @if (detail.items.length > 0) {
+                <div class="mt-4 pt-3 border-t border-surface-variant border-dashed space-y-2.5 pl-[64px]">
+                  @for (subItem of detail.items; track subItem.id) {
+                    <div class="flex justify-between items-center bg-surface-container-lowest rounded">
+                      <div class="flex-1 pr-3">
+                        <span class="text-xs text-on-surface-variant block truncate">{{ subItem.item || subItem.category || '未命名項目' }}</span>
+                      </div>
+                      <span class="text-sm font-semibold text-on-surface/80">¥{{ subItem.amount | number }}</span>
+                    </div>
+                  }
+                </div>
+              }
+              
+            </div>
+          }
+        }
+      </section>
+
+    </div>
+  }
+</div>

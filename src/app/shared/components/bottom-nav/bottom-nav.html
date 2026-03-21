@@ -1,0 +1,21 @@
+<nav class="w-full z-50 rounded-t-[2.5rem] pb-safe bg-[#fff8f6]/95 backdrop-blur-xl shadow-[0_-4px_24px_rgba(141,76,76,0.06)] flex justify-between items-center h-20 px-2 sm:px-4">
+  @for (item of navItems; track item.route) {
+    <a [routerLink]="item.route" 
+       routerLinkActive="bg-[#ffdad4] text-[#4d2821] rounded-full scale-100 shadow-sm" 
+       [routerLinkActiveOptions]="{exact: false}"
+       [class.text-[#81534b]]="!rla.isActive"
+       [class.hover:text-[#8d4c4c]]="!rla.isActive"
+       #rla="routerLinkActive"
+       class="flex flex-1 flex-col items-center justify-center px-1 py-1.5 mx-0.5 transition-all duration-300 ease-out active:scale-95 select-none overflow-hidden min-w-0">
+       
+      <span class="material-symbols-outlined transition-colors duration-300"
+            [style]="rla.isActive ? 'font-variation-settings: \'FILL\' 1' : 'font-variation-settings: \'FILL\' 0'">
+        {{ item.icon }}
+      </span>
+      
+      <span class="font-['Lexend'] text-[9px] sm:text-[10px] font-medium uppercase tracking-widest mt-1 transition-colors duration-300 text-center w-full truncate">
+        {{ item.label }}
+      </span>
+    </a>
+  }
+</nav>
