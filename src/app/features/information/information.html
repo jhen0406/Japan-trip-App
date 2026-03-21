@@ -38,11 +38,13 @@
                [class.grid-rows-[0fr]]="!section.isOpen" 
                class="grid transition-[grid-template-rows] duration-300 ease-in-out">
             <div class="overflow-hidden">
-              <div class="p-5 pt-1 border-t border-slate-50/50" [innerHTML]="section.contentHtml">
+              <div class="p-5 pt-1 border-t border-slate-50/50"
+                   [innerHTML]="idx === sections().length - 1 ? hakataMapHtml : section.contentHtml">
                 <!-- Content injected via innerHTML from TS -->
               </div>
             </div>
           </div>
+
           
         </div>
       }
