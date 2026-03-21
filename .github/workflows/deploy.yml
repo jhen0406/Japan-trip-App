@@ -44,12 +44,16 @@ jobs:
       - name: Build
         run: |
           REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
-          npx ng build --configuration production --base-href "/${REPO_NAME}/"
+          npx ng build --configuration production \
+            --base-href "/${REPO_NAME}/" \
+            --output-path dist/out
+          # SPA fallback：直接重新整理任何路由都不會 404
+          cp dist/out/browser/index.html dist/out/browser/404.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist/japan-trip-app/browser
+          path: dist/out/browser
 
   deploy:
     needs: build
