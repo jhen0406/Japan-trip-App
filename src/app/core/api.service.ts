@@ -32,8 +32,28 @@ export interface AccountingItem {
 export class ApiService {
   private http = inject(HttpClient);
   private apiUrl = environment.googleAppScriptUrl;
+  private get isApiConfigured(): boolean {
+    return !!this.apiUrl &&
+      !this.apiUrl.includes('YOUR_SCRIPT_ID') &&
+      this.apiUrl.startsWith('https://script.google.com');
+  }
 
   getItinerary(): Observable<ItineraryItem[]> {
+    if (!this.isApiConfigured) {
+      console.warn('GAS URL 未設定，使用本地假資料');
+      return of([
+        {
+          day: 'D1', time: '10:00', location: '抵達福岡機場', description: '領行李、換 JR Pass',
+          mapKeyword: '福岡機場國際線', transport: '地鐵', duration: '15分',
+          imageUrl: 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&q=80&w=800'
+        },
+        {
+          day: 'D1', time: '12:00', location: '博多車站吃拉麵', description: '一蘭或博多雙星，記得提早排隊！',
+          mapKeyword: '博多車站', transport: '', duration: '',
+          imageUrl: 'https://images.unsplash.com/photo-1558980182-01d84814982a?auto=format&fit=crop&q=80&w=800'
+        }
+      ] as ItineraryItem[]);
+    }
     return this.http.get<{status: string, data: any[]}>(this.apiUrl).pipe(
       map(res => {
         if (res?.status === 'success' && res.data) {
@@ -84,6 +104,10 @@ export class ApiService {
   }
 
   getAccounting(): Observable<AccountingItem[]> {
+    if (!this.isApiConfigured) {
+      console.warn('GAS URL 未設定，回傳空記帳清單');
+      return of([] as AccountingItem[]);
+    }
     return this.http.get<{status: string, data: any[]}>(`${this.apiUrl}?type=accounting`).pipe(
       map(res => {
         if (res?.status === 'success' && res.data) {

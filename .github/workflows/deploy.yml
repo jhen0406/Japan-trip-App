@@ -31,6 +31,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Validate secrets
+        run: |
+          if [ -z "${{ secrets.GOOGLE_APP_SCRIPT_URL }}" ]; then
+            echo "❌ Secret GOOGLE_APP_SCRIPT_URL 未設定！"
+            echo "請至 GitHub Repo → Settings → Secrets and variables → Actions 新增此 Secret"
+            exit 1
+          fi
+          if [ -z "${{ secrets.OPEN_WEATHER_API_KEY }}" ]; then
+            echo "❌ Secret OPEN_WEATHER_API_KEY 未設定！"
+            exit 1
+          fi
+          echo "✅ Secrets 驗證通過"
+
       - name: Write environment file from secrets
         run: |
           cat > src/environments/environment.ts << EOF
