@@ -56,6 +56,13 @@
           </div>
         </div>
 
+        <!-- 日期 (忘記記帳可補登) -->
+        <div class="mb-4">
+          <label class="block text-xs font-medium text-on-surface-variant mb-1.5 ml-1">記錄日期 (忘記記帳可修改)</label>
+          <input type="date" [(ngModel)]="formData.recordDate" name="recordDate"
+                 class="w-full bg-surface-bright border-none rounded-2xl px-4 py-3 text-sm font-medium text-on-surface focus:ring-2 focus:ring-primary/40 outline-none">
+        </div>
+
         <!-- 類別 & 購買項目 -->
         <div class="grid grid-cols-2 gap-3 mb-4">
           <div>

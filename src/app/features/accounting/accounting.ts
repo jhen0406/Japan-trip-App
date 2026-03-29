@@ -28,7 +28,8 @@ export class Accounting implements OnInit {
     location: '',
     taxFree: false,
     imageBase64: '',
-    imageName: ''
+    imageName: '',
+    recordDate: ''
   };
 
   categories = ['藥妝', '餐食', '伴手禮', '服飾', '生活雜物', '交通', '住宿', '其他'];
@@ -146,7 +147,8 @@ export class Accounting implements OnInit {
       location: '',
       taxFree: false,
       imageBase64: '',
-      imageName: ''
+      imageName: '',
+      recordDate: ''
     };
   }
 

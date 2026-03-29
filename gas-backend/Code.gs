@@ -60,22 +60,23 @@ function doPost(e) {
     
     // 從 Payload 解構出前端欄位
     // 前端欄位：金額(amount), 幣別(currency), 類別(category), 購買項目(item), 付款人(payer), 
-    // 付款方式(payMethod), 購買地點(location), 是否退稅(taxFree)
-    const { amount, currency, category, item, payer, payMethod, location, taxFree } = postData;
+    // 付款方式(payMethod), 購買地點(location), 是否退稅(taxFree), 日期時間(recordDate)
+    const { amount, currency, category, item, payer, payMethod, location, taxFree, recordDate } = postData;
 
-    // 依照使用者需求格式 A~K 填入 (這裡我們自動擴充 J與K 放幣別與類別)
+    // 依照使用者需求格式 A~L 填入 (這裡我們自動擴充 J與K 放幣別與類別，且因使用者在B往右插入C為日期時間，故欄位全數右移)
     const newRow = [
       id,                                     // A: ID
-      timestamp,                              // B: 紀錄時間
-      item || '',                             // C: 購買項目
-      amount || 0,                            // D: 金額
-      payer || '',                            // E: 誰付款
-      payMethod || '',                        // F: 付款方式
-      location || '',                         // G: 購買地點
-      taxFree ? '是' : '否',                     // H: 是否退稅
-      imageUrl || '',                         // I: 圖片連結
-      currency || 'JPY',                      // J: 幣別 (額外加上)
-      category || '其他'                        // K: 類別 (額外加上)
+      timestamp,                              // B: 紀錄時間 (系統填入的時間)
+      recordDate || '',                       // C: 日期時間 (使用者自己填的記帳時間)
+      item || '',                             // D: 購買項目
+      amount || 0,                            // E: 金額
+      payer || '',                            // F: 誰付款
+      payMethod || '',                        // G: 付款方式
+      location || '',                         // H: 購買地點
+      taxFree ? '是' : '否',                     // I: 是否退稅
+      imageUrl || '',                         // J: 圖片連結
+      currency || 'JPY',                      // K: 幣別
+      category || '其他'                        // L: 類別
     ];
 
     // 寫入 Google Sheet
